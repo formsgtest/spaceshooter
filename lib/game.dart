@@ -97,8 +97,8 @@ class SpaceShooterGame extends FlameGame
 
 class Player extends SpriteComponent
     with CollisionCallbacks, HasGameRef<SpaceShooterGame> {
-  int health = 1;
-  double shootRate = 0.5;
+  int health = 100;
+  double shootRate = 0.3;
   double lastShootTime = 0;
   double speed = 200;
 
@@ -155,7 +155,7 @@ class Player extends SpriteComponent
   }
 
   void reset() {
-    health = 1;
+    health = 100;
     position = Vector2(gameRef.size.x / 2, gameRef.size.y - 100);
   }
 }
