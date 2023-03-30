@@ -140,7 +140,7 @@ class Player extends SpriteComponent
 
   void shoot() {
     final bullet = Bullet();
-    bullet.position = position;
+    bullet.position = position + Vector2(0, -height / 2);
     gameRef.add(bullet);
   }
 
