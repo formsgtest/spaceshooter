@@ -1,0 +1,103 @@
+import 'package:flame/components.dart';
+import 'package:flame/events.dart';
+import 'package:flame/game.dart';
+import 'package:flutter/material.dart';
+import 'package:flame/collisions.dart';
+import 'package:flame/parallax.dart';
+
+class SpaceShooterGame extends FlameGame
+    with HasCollisionDetection, PanDetector, TapDetector {
+  bool _isAlreadyLoaded = false;
+  late Player _player;
+  late Enemy _enemy;
+  late EnemyManager _enemyManager;
+
+  @override
+  Future<void> onLoad() async {
+    await super.onLoad();
+
+    if (!_isAlreadyLoaded) {
+      camera.viewport = FixedResolutionViewport(Vector2(360, 640));
+      final parallax = await loadParallaxComponent(
+        [
+          ParallaxImageData('stars1.png'),
+        ],
+        repeat: ImageRepeat.repeat,
+        baseVelocity: Vector2(0, -50),
+        velocityMultiplierDelta: Vector2(0, 1.5),
+      );
+      add(parallax);
+      _player = Player();
+      add(_player);
+      _enemy = Enemy();
+      add(_enemy);
+      _enemyManager = EnemyManager();
+      add(_enemyManager);
+    }
+    _isAlreadyLoaded = true;
+  }
+
+  void reset() {}
+
+  @override
+  void onPanUpdate(DragUpdateInfo info) {
+    _player.move(info.delta.game);
+  }
+}
+
+class EnemyManager extends Component with HasGameRef<SpaceShooterGame> {}
+
+class Enemy extends SpriteComponent
+    with CollisionCallbacks, HasGameRef<SpaceShooterGame> {
+  double _Speed = 100;
+
+  @override
+  Future<void> onLoad() async {
+    await super.onLoad();
+    sprite = await gameRef.loadSprite('enemy.png');
+    width = 35;
+    height = 40;
+    anchor = Anchor.center;
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    moveTowardsPlayer(dt);
+  }
+
+  void moveTowardsPlayer(double dt) {
+    final player = gameRef._player;
+    final diff = player.position - position;
+    // Normalize the vector to get direction towards player
+    final direction = diff.normalized();
+    position += direction * _Speed * dt;
+  }
+}
+
+class Player extends SpriteComponent
+    with CollisionCallbacks, HasGameRef<SpaceShooterGame> {
+  @override
+  Future<void> onLoad() async {
+    await super.onLoad();
+    sprite = await gameRef.loadSprite('ship_H.png');
+    position = Vector2(gameRef.size.x / 2, gameRef.size.y - 100);
+    width = 60;
+    height = 70;
+    anchor = Anchor.center;
+  }
+
+  void move(Vector2 delta) {
+    position.add(delta);
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    if (position.x < 0) {
+      position.x = 0;
+    } else if (position.x > gameRef.size.x) {
+      position.x = gameRef.size.x;
+    }
+  }
+}

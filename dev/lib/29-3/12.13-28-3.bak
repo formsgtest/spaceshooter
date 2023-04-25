@@ -1,0 +1,69 @@
+import 'dart:math';
+import 'package:flame/components.dart';
+import 'package:flame/events.dart';
+import 'package:flame/game.dart';
+import 'package:flutter/material.dart';
+import 'package:flame/collisions.dart';
+import 'package:flame/parallax.dart';
+import 'package:hive/hive.dart';
+import 'package:flame_audio/flame_audio.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'overlays/game_over_menu.dart';
+
+class SpaceShooterGame extends FlameGame
+    with HasCollisionDetection, PanDetector, TapDetector {
+  bool _isAlreadyLoaded = false;
+  late AudioPlayerComponent _audioPlayerComponent;
+
+  @override
+  Future<void> onLoad() async {
+    await super.onLoad();
+
+    if (!_isAlreadyLoaded) {
+      camera.viewport = FixedResolutionViewport(Vector2(360, 640));
+      final parallax = await loadParallaxComponent(
+        [
+          ParallaxImageData('stars1.png'),
+        ],
+        repeat: ImageRepeat.repeat,
+        baseVelocity: Vector2(0, -50),
+        velocityMultiplierDelta: Vector2(0, 1.5),
+      );
+      add(parallax);
+
+      _audioPlayerComponent = AudioPlayerComponent();
+      add(_audioPlayerComponent);
+    _audioPlayerComponent.playBgm('background_music.mp3');
+    }
+    _isAlreadyLoaded = true;
+
+
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+  }
+
+  @override
+  void render(Canvas canvas) {
+    super.render(canvas);
+  }
+
+  void reset() {}
+}
+
+class AudioPlayerComponent extends Component with HasGameRef<SpaceShooterGame> {
+  @override
+  Future<void>? onLoad() async {
+    await FlameAudio.audioCache.loadAll([
+      'background_music.mp3',
+    ]);
+    return super.onLoad();
+  }
+
+  void playBgm(String filename) {
+    FlameAudio.bgm.play(filename);
+  }
+}
+
